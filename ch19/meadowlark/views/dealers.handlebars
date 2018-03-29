@@ -1,0 +1,62 @@
+<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&sensor=false"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/1.3.0/handlebars.min.js"></script>
+
+<script id="dealerTemplate" type="text/x-handlebars-template">
+  \{{#each dealers}}
+  <div class="dealer">
+    <h3>\{{name}}</h3>
+    \{{address1}}<br>
+    \{{#if address2}}\{{address2}}<br>\{{/if}}
+    \{{city}}, \{{state}} \{{zip}}<br>
+    \{{#if country}}\{{country}}<br>\{{/if}}
+    \{{#if phone}}\{{phone}}<br>\{{/if}}
+    \{{#if website}}<a href="{{website}}">\{{website}}</a><br>\{{/if}}
+  </div>
+  \{{/each}}
+</script>
+<div class="dealers">
+  <div id="map"></div>
+  <div id="dealerList"></div>
+</div>
+
+{{#section 'jquery'}}
+<script>
+  var map;
+  var dealerTemplate = Handlebars.compile(${'#dealerTemplate').html());
+    $(document).ready(function(){
+      // 맵 중심을 서울시 관악구로 정하고, 관악구가 잘 보일 정도로 확대합니다.
+      var mapOptions = {
+	center: new google.maps.LatLng(37,49, 126.95),
+	zoom: 12
+      };
+
+      // 지도 초기화
+      map = new google.maps.Map(
+	document.getElementById('map'), mapOptions
+      );
+
+      // 가독성을 위한 약어
+      var LatLng = google.maps.LatLng;
+
+      // JSON 가져오기
+      $.getJSON('/dealers.json', function(dealers){
+	// 각 판매자를 마커로 표시
+	dealers.forEach(function(d){
+	  // 지오코딩되지 않은 판매자는 넘어갑니다.
+	  if(!d.lat || !d.lng) return;
+	  var pos = new LatLng(d.lat, d.lng);
+	  var marker = new LatLng(d.lat, d.lng);
+	  var marker = new google.maps.Marker({
+	    position: pos,
+	    map: map,
+	    title: d.name
+	  });
+	});
+	// 핸들바를 써서 판매자 목록을 업데이트합니다.
+	$('#dealerList').html(dealerTemplate({
+	  dealers: dealers
+	}));
+      });
+    });
+</script>
+{{/section}}

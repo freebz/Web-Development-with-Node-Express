@@ -1,0 +1,7 @@
+body {
+  background-image: url("/img/background.png");
+}
+.dealers #map {
+  Width: 100%;
+  height: 400px;
+}
